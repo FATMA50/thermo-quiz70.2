@@ -1,0 +1,1426 @@
+
+# Let me write the file in parts to avoid the JSON parsing issue
+quiz_html = """<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار شامل - تاريخ الرياضيات (3 فصول)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Naskh Arabic', 'Traditional Arabic', 'Arial', serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #2c3e50; line-height: 2; padding: 20px; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1a5276 0%, #2e86c1 50%, #5dade2 100%); color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { font-size: 2em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .stats-bar { display: flex; justify-content: space-around; background: #f8f9fa; padding: 15px; border-bottom: 2px solid #e9ecef; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 1.8em; font-weight: 700; color: #2e86c1; }
+        .stat-label { font-size: 0.9em; color: #6c757d; }
+        .content { padding: 30px; }
+        .section-title { background: linear-gradient(90deg, #e74c3c, #c0392b); color: white; padding: 12px 20px; border-radius: 10px; font-size: 1.3em; font-weight: 700; margin: 30px 0 20px; display: flex; align-items: center; gap: 10px; }
+        .section-title.mc { background: linear-gradient(90deg, #27ae60, #229954); }
+        .section-title.tf { background: linear-gradient(90deg, #8e44ad, #7d3c98); }
+        .question { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-right: 5px solid #2e86c1; transition: all 0.3s; }
+        .question:hover { transform: translateX(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .question-number { display: inline-block; background: #2e86c1; color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; line-height: 35px; font-weight: 700; margin-left: 10px; font-size: 0.9em; }
+        .question-text { font-weight: 600; color: #2c3e50; margin-bottom: 12px; font-size: 1.05em; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .option { background: white; border: 2px solid #dee2e6; border-radius: 8px; padding: 10px 15px; cursor: pointer; transition: all 0.2s; font-size: 0.95em; }
+        .option:hover { border-color: #2e86c1; background: #e8f4f8; }
+        .option-label { font-weight: 700; color: #2e86c1; margin-left: 5px; }
+        .tf-options { display: flex; gap: 15px; margin-top: 10px; }
+        .tf-option { background: white; border: 2px solid #dee2e6; border-radius: 8px; padding: 8px 25px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .tf-option:hover { border-color: #8e44ad; background: #f3e5f5; }
+        .answer-section { margin-top: 15px; padding-top: 15px; border-top: 2px dashed #dee2e6; display: none; }
+        .answer-section.show { display: block; }
+        .correct-answer { background: #d4edda; border: 2px solid #28a745; color: #155724; padding: 10px 15px; border-radius: 8px; font-weight: 600; margin-top: 8px; }
+        .explanation { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 10px 15px; border-radius: 8px; margin-top: 8px; font-size: 0.95em; }
+        .toggle-btn { background: linear-gradient(135deg, #2e86c1, #5dade2); color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-top: 10px; transition: all 0.3s; }
+        .toggle-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(46, 134, 193, 0.4); }
+        .chapter-tag { display: inline-block; background: #e74c3c; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-right: 8px; vertical-align: middle; }
+        .chapter-tag.ch2 { background: #27ae60; }
+        .chapter-tag.ch3 { background: #8e44ad; }
+        .footer { background: #1a5276; color: white; text-align: center; padding: 20px; font-size: 0.9em; }
+        @media (max-width: 768px) { .options { grid-template-columns: 1fr; } .header h1 { font-size: 1.5em; } }
+        @media print { body { background: white; } .container { box-shadow: none; } .toggle-btn { display: none; } .answer-section { display: block !important; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>اختبار شامل - تاريخ الرياضيات</h1>
+            <p>الفصل الأول: الرياضيات والأعداد | الفصل الثاني: الأعداد وتطورها | الفصل الثالث: العمليات الحسابية</p>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item"><div class="stat-number">70</div><div class="stat-label">سؤال إجمالي</div></div>
+            <div class="stat-item"><div class="stat-number">35</div><div class="stat-label">اختيار من متعدد</div></div>
+            <div class="stat-item"><div class="stat-number">35</div><div class="stat-label">صح وخطأ</div></div>
+            <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">فصول</div></div>
+        </div>
+        <div class="content">
+"""
+
+with open("/mnt/agents/output/quiz_part1.html", "w", encoding="utf-8") as f:
+    f.write(quiz_html)
+
+print("Part 1 written successfully")
+          
+# Part 2 - MC Questions 1-20
+quiz_part2 = """
+            <div class="section-title mc">اسئلة الاختيار من متعدد (35 سؤال)</div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">1</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    ما هو التعريف الأدق للرياضيات كعلم؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> علم يدرس الأعداد فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> علم يدرس الأعداد والفراغ والكميات والمقادير</div>
+                    <div class="option"><span class="option-label">ج)</span> علم يدرس الهندسة فقط</div>
+                    <div class="option"><span class="option-label">د)</span> علم يدرس الإحصاء فقط</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) علم يدرس الأعداد والفراغ والكميات والمقادير</div>
+                    <div class="explanation">الرياضيات تعرف بأنها "علم المقدار المتصل والمنفصل" أو "علم الكم"، وتدرس الأعداد والفراغ والكميات والمقادير.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">2</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    أي من الفروع التالية يدرس العلاقات الرياضية باستخدام الرموز والمتغيرات؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> الحساب</div>
+                    <div class="option"><span class="option-label">ب)</span> الهندسة</div>
+                    <div class="option"><span class="option-label">ج)</span> الجبر</div>
+                    <div class="option"><span class="option-label">د)</span> الإحصاء</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) الجبر</div>
+                    <div class="explanation">الجبر هو فرع الرياضيات الذي يدرس العلاقات الرياضية باستخدام الرموز والمتغيرات، مثل x و y.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">3</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    ما هو الفرع الذي يربط بين الجبر والهندسة باستخدام المعادلات الجبرية؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> حساب التفاضل والتكامل</div>
+                    <div class="option"><span class="option-label">ب)</span> الهندسة التحليلية</div>
+                    <div class="option"><span class="option-label">ج)</span> نظرية المجموعات</div>
+                    <div class="option"><span class="option-label">د)</span> الاحتمالات</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) الهندسة التحليلية</div>
+                    <div class="explanation">الهندسة التحليلية تربط بين الجبر والهندسة باستخدام المعادلات الجبرية لتمثيل الأشكال الهندسية.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">4</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    أي من التالي يعتبر من مكونات البنية الرياضية؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> المفاهيم والتعريفات والمسلمات والنظريات</div>
+                    <div class="option"><span class="option-label">ب)</span> الأعداد والحروف فقط</div>
+                    <div class="option"><span class="option-label">ج)</span> الرسومات والجداول فقط</div>
+                    <div class="option"><span class="option-label">د)</span> القوانين والقواعد فقط</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) المفاهيم والتعريفات والمسلمات والنظريات</div>
+                    <div class="explanation">مكونات البنية الرياضية هي: المفاهيم (الأساسيات)، التعريفات (التوضيح)، المسلمات/البديهيات (الافتراضات)، والنظريات (النتائج المبرهنة).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">5</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    من أهم أهداف تدريس الرياضيات في الجانب التدريبي:
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> حفظ القوانين فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> تنمية التفكير السليم ومهارات حل المشكلات</div>
+                    <div class="option"><span class="option-label">ج)</span> حل المسائل بسرعة دون فهم</div>
+                    <div class="option"><span class="option-label">د)</span> الاعتماد على الآلة الحاسبة</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) تنمية التفكير السليم ومهارات حل المشكلات</div>
+                    <div class="explanation">من أهم الأهداف التدريبية: تنمية التفكير السليم، تنمية مهارات حل المشكلات، واكتساب قيم إيجابية مثل الدقة والنظام والصبر.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">6</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    لماذا تُدرس تاريخ الرياضيات للمعلم؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> لحفظ التواريخ فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> لفهم تطور الفكر الرياضي وإدراك صعوبات التلاميذ</div>
+                    <div class="option"><span class="option-label">ج)</span> لمعرفة أسماء العلماء فقط</div>
+                    <div class="option"><span class="option-label">د)</span> لزيادة عدد ساعات التدريس</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) لفهم تطور الفكر الرياضي وإدراك صعوبات التلاميذ</div>
+                    <div class="explanation">دراسة التاريخ تساعد المعلم على فهم تطور الفكر الرياضي، وإدراك أن التلاميذ يواجهون نفس الصعوبات التي واجهها القدماء، مما يساعده في تدريسهم.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">7</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هي مراحل تطور طرق العد بالترتيب الصحيح؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> المقارنة المباشرة -> المقارنة بالأشياء المعروفة -> اختراع الرموز</div>
+                    <div class="option"><span class="option-label">ب)</span> اختراع الرموز -> المقارنة المباشرة -> المقارنة بالأشياء المعروفة</div>
+                    <div class="option"><span class="option-label">ج)</span> المقارنة بالأشياء المعروفة -> المقارنة المباشرة -> اختراع الرموز</div>
+                    <div class="option"><span class="option-label">د)</span> المقارنة المباشرة -> اختراع الرموز -> المقارنة بالأشياء المعروفة</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) المقارنة المباشرة -> المقارنة بالأشياء المعروفة -> اختراع الرموز</div>
+                    <div class="explanation">المراحل: أولاً المقارنة المباشرة (واحد بواحد)، ثم المقارنة بالأشياء المعروفة (أصابع، حصى)، وأخيراً اختراع الرموز العددية.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">8</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    في النظام الروماني، ما قيمة الرمز X؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 1</div>
+                    <div class="option"><span class="option-label">ب)</span> 5</div>
+                    <div class="option"><span class="option-label">ج)</span> 10</div>
+                    <div class="option"><span class="option-label">د)</span> 50</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) 10</div>
+                    <div class="explanation">X = 10 (اليدين المتقاطعتين)، I = 1، V = 5، L = 50، C = 100، D = 500، M = 1000.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">9</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    كم يساوي العدد الروماني CMXCIX؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 999</div>
+                    <div class="option"><span class="option-label">ب)</span> 1099</div>
+                    <div class="option"><span class="option-label">ج)</span> 1999</div>
+                    <div class="option"><span class="option-label">د)</span> 1199</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) 999</div>
+                    <div class="explanation">CM = 900، XC = 90، IX = 9 -> 900 + 90 + 9 = 999. (ملاحظة: MCMXCIX = 1999)</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">10</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هو الأساس في النظام البابلي (الستيني)؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 10</div>
+                    <div class="option"><span class="option-label">ب)</span> 60</div>
+                    <div class="option"><span class="option-label">ج)</span> 20</div>
+                    <div class="option"><span class="option-label">د)</span> 100</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) 60</div>
+                    <div class="explanation">النظام البابلي يستخدم الأساس 60 (الستيني)، وما زلنا نستخدمه في قياس الزوايا (360 درجة) والوقت (60 دقيقة، 60 ثانية).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">11</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    من أول من استخدم رمزاً للصفر؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> الرومان</div>
+                    <div class="option"><span class="option-label">ب)</span> البابليون</div>
+                    <div class="option"><span class="option-label">ج)</span> اليونان</div>
+                    <div class="option"><span class="option-label">د)</span> المصريون</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) البابليون</div>
+                    <div class="explanation">البابليون كانوا أول من استخدم رمزاً للصفر (ابتداءً كفراغ، ثم كرمز)، ثم طوره الهنود والعرب.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">12</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هو العدد التام التالي بعد 28؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 496</div>
+                    <div class="option"><span class="option-label">ب)</span> 100</div>
+                    <div class="option"><span class="option-label">ج)</span> 496</div>
+                    <div class="option"><span class="option-label">د)</span> 8128</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) 496</div>
+                    <div class="explanation">الأعداد التامة: 6, 28, 496, 8128... باستخدام قاعدة أقليدس: عند n=5، 2^5-1=31 (أولي) -> 2^4*31=496.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">13</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    أي من الأزواج التالية يمثل أعداداً متحابة؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> (6, 8)</div>
+                    <div class="option"><span class="option-label">ب)</span> (220, 284)</div>
+                    <div class="option"><span class="option-label">ج)</span> (10, 15)</div>
+                    <div class="option"><span class="option-label">د)</span> (12, 18)</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) (220, 284)</div>
+                    <div class="explanation">220 و 284 هما أعداد متحابة: مجموع قواسم 220 (باستثناء نفسه) = 284، ومجموع قواسم 284 = 220.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">14</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هي صيغة العدد المثلث العاشر؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 10 * 9 / 2 = 45</div>
+                    <div class="option"><span class="option-label">ب)</span> 10 * 11 / 2 = 55</div>
+                    <div class="option"><span class="option-label">ج)</span> 10^2 = 100</div>
+                    <div class="option"><span class="option-label">د)</span> 10 + 11 = 21</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) 10 * 11 / 2 = 55</div>
+                    <div class="explanation">صيغة العدد المثلث: T_n = n(n+1)/2. للعدد العاشر: 10*11/2 = 110/2 = 55.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">15</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    من نقل الأرقام الهندية إلى العالم الإسلامي؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> ابن سينا</div>
+                    <div class="option"><span class="option-label">ب)</span> الخوارزمي</div>
+                    <div class="option"><span class="option-label">ج)</span> ابن الهيثم</div>
+                    <div class="option"><span class="option-label">د)</span> الرازي</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) الخوارزمي</div>
+                    <div class="explanation">الخوارزمي (القرن التاسع الميلادي) كتب كتاب "الخوارزمي في الأرقام الهندية" ونقل الأرقام الهندية للعالم الإسلامي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">16</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هو العدد الأولي التالي بعد 13؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 14</div>
+                    <div class="option"><span class="option-label">ب)</span> 15</div>
+                    <div class="option"><span class="option-label">ج)</span> 17</div>
+                    <div class="option"><span class="option-label">د)</span> 19</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) 17</div>
+                    <div class="explanation">الأعداد الأولية: 2, 3, 5, 7, 11, 13, 17, 19... 14 = 2*7 (ليس أولياً)، 15 = 3*5 (ليس أولياً)، 17 أولي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">17</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    أي نظام عدد يعتمد على القيمة المكانية؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> النظام الروماني</div>
+                    <div class="option"><span class="option-label">ب)</span> النظام اليوناني</div>
+                    <div class="option"><span class="option-label">ج)</span> النظام العشري الحالي</div>
+                    <div class="option"><span class="option-label">د)</span> النظام العربي القديم</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) النظام العشري الحالي</div>
+                    <div class="explanation">النظام العشري الحالي (الهندي-العربي) هو نظام موضعي: قيمة الرقم تعتمد على موقعه (آحاد، عشرات، مئات...).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">18</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    كم يساوي العدد المربع السابع؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 14</div>
+                    <div class="option"><span class="option-label">ب)</span> 21</div>
+                    <div class="option"><span class="option-label">ج)</span> 49</div>
+                    <div class="option"><span class="option-label">د)</span> 56</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) 49</div>
+                    <div class="explanation">العدد المربع = n^2. العدد المربع السابع = 7^2 = 49. أو بجمع الفردية: 1+3+5+7+9+11+13 = 49.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">19</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    ما هو تعريف العدد الزائد (Abundant)؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> مجموع قواسمه أصغر منه</div>
+                    <div class="option"><span class="option-label">ب)</span> مجموع قواسمه يساويه</div>
+                    <div class="option"><span class="option-label">ج)</span> مجموع قواسمه أكبر منه</div>
+                    <div class="option"><span class="option-label">د)</span> لا يقبل القسمة إلا على نفسه</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) مجموع قواسمه أكبر منه</div>
+                    <div class="explanation">العدد الزائد: مجموع قواسمه التامة (باستثناء نفسه) أكبر من العدد. مثال: 12 (1+2+3+4+6=16 > 12).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">20</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    في النظام المصري القديم، ما قيمة رمز الزهرة؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 100</div>
+                    <div class="option"><span class="option-label">ب)</span> 1000</div>
+                    <div class="option"><span class="option-label">ج)</span> 10000</div>
+                    <div class="option"><span class="option-label">د)</span> 100000</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) 1000</div>
+                    <div class="explanation">في النظام المصري: زهرة اللوتس = 1000، الإصبع = 10000، الضفدعة = 100000.</div>
+                </div>
+            </div>
+"""
+
+with open("/mnt/agents/output/quiz_part2.html", "w", encoding="utf-8") as f:
+    f.write(quiz_part2)
+
+print("Part 2 written successfully")
+          
+# Part 3 - MC Questions 21-35
+quiz_part3 = """
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">21</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    ما هي أقدم طريقة معروفة للقسمة؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> طريقة السفينة الشراعية</div>
+                    <div class="option"><span class="option-label">ب)</span> طريقة القدماء المصريين (التضعيف)</div>
+                    <div class="option"><span class="option-label">ج)</span> طريقة جالويس</div>
+                    <div class="option"><span class="option-label">د)</span> طريقة التجزيء</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) طريقة القدماء المصريين (التضعيف)</div>
+                    <div class="explanation">المصريون القدماء كانوا أول من استخدم طريقة القسمة بالتضعيف والتصنيف، وهي من أقدم طرق القسمة المعروفة.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">22</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالأصابع (7 × 8)، ما هو حاصل ضرب الأصابع المطوية؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 3 × 2 = 6</div>
+                    <div class="option"><span class="option-label">ب)</span> 2 × 3 = 6</div>
+                    <div class="option"><span class="option-label">ج)</span> 5 × 5 = 25</div>
+                    <div class="option"><span class="option-label">د)</span> 7 × 8 = 56</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) 3 × 2 = 6</div>
+                    <div class="explanation">في 7×8: 7 = 5+2 (2 مرفوعة، 3 مطوية)، 8 = 5+3 (3 مرفوعة، 2 مطوية). المطوية: 3×2 = 6. المرفوعة: (2+3)×10 = 50. الناتج: 50+6 = 56.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">23</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    ما هي طريقة "النقص من 10" المستخدمة في الطرح؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> طريقة مصرية</div>
+                    <div class="option"><span class="option-label">ب)</span> طريقة هندية</div>
+                    <div class="option"><span class="option-label">ج)</span> طريقة رومانية</div>
+                    <div class="option"><span class="option-label">د)</span> طريقة بابلية</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) طريقة هندية</div>
+                    <div class="explanation">الهنود اخترعوا مبدأ "التكملة" أو "النقص من 10" في الطرح: a - b = a + (10 - b) - 10.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">24</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الضرب بالطريقة المصرية القديمة، ما هو المبدأ الأساسي؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> التجزيء</div>
+                    <div class="option"><span class="option-label">ب)</span> التضعيف وجمع المضاعفات</div>
+                    <div class="option"><span class="option-label">ج)</span> الشبكة</div>
+                    <div class="option"><span class="option-label">د)</span> خانة المحفوظات</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) التضعيف وجمع المضاعفات</div>
+                    <div class="explanation">المصريون كانوا يضاعفون العدد الأصغر (1, 2, 4, 8...) ثم يجمعون المضاعفات المقابلة للعدد الأكبر.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">25</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    ما هي "خانة المحفوظات" في الجمع العربي القديم؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> خانة لكتابة العدد الأكبر</div>
+                    <div class="option"><span class="option-label">ب)</span> خانة إضافية لحفظ الحمل (العشرات)</div>
+                    <div class="option"><span class="option-label">ج)</span> خانة للنتيجة النهائية</div>
+                    <div class="option"><span class="option-label">د)</span> خانة للأخطاء</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) خانة إضافية لحفظ الحمل (العشرات)</div>
+                    <div class="explanation">العرب أضافوا خانة إضافية قبل المجموع تسمى "خانة المحفوظات" لحفظ الحمل (العشرات) عند جمع كل عمود.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">26</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالشبكة (الصينية)، كيف يتم جمع النواتج؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> بالأعمدة فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> بالصفوف فقط</div>
+                    <div class="option"><span class="option-label">ج)</span> على الأقطار (الأنحاء المائلة)</div>
+                    <div class="option"><span class="option-label">د)</span> بالقيمة المكانية</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) على الأقطار (الأنحاء المائلة)</div>
+                    <div class="explanation">في طريقة الشبكة، نضرب كل رقم في الآخر ونضع الناتج في الخانة، ثم نجمع على الأقطار المائلة للحصول على الناتج النهائي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">27</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    من استخدم طريقة "السفينة الشراعية" في القسمة؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> المصريون القدماء</div>
+                    <div class="option"><span class="option-label">ب)</span> الأوروبيون في العصور الوسطى</div>
+                    <div class="option"><span class="option-label">ج)</span> الهنود</div>
+                    <div class="option"><span class="option-label">د)</span> البابليون</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) الأوروبيون في العصور الوسطى</div>
+                    <div class="explanation">طريقة السفينة الشراعية (Galois) استخدمها الأوروبيون في العصور الوسطى، وتعتمد على مبدأ "النقص من 10".</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">28</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الجمع الروماني القديم، كيف كان يتم الاختصار؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> بإضافة الرموز فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> باستبدال مجموعات الرموز برموز أكبر</div>
+                    <div class="option"><span class="option-label">ج)</span> بحذف الرموز الصغيرة</div>
+                    <div class="option"><span class="option-label">د)</span> بضرب الرموز</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) باستبدال مجموعات الرموز برموز أكبر</div>
+                    <div class="explanation">مثال: DCCCC (500+100+100+100+100) = CM (1000-100 = 900)، LXXXX (50+10+10+10+10) = XC (100-10 = 90).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">29</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالتجزيء (العربية)، نجزئ كل عدد إلى:
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> عددين فقط</div>
+                    <div class="option"><span class="option-label">ب)</span> أجزائه حسب المنازل (آحاد، عشرات، مئات...)</div>
+                    <div class="option"><span class="option-label">ج)</span> أعداد أولية</div>
+                    <div class="option"><span class="option-label">د)</span> أعداد زوجية وفردية</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) أجزائه حسب المنازل (آحاد، عشرات، مئات...)</div>
+                    <div class="explanation">مثال: 718 × 202 = (700+10+8) × (200+0+2)، ثم نضرب كل جزء في كل الأجزاء الأخرى ونجمع.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">30</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    ما هي أداة "المعداد" الصينية؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> آلة حاسبة إلكترونية</div>
+                    <div class="option"><span class="option-label">ب)</span> أعمدة خرز لتمثيل الأعداد وإجراء العمليات</div>
+                    <div class="option"><span class="option-label">ج)</span> ورقة وحبر</div>
+                    <div class="option"><span class="option-label">د)</span> أصابع اليد</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) أعمدة خرز لتمثيل الأعداد وإجراء العمليات</div>
+                    <div class="explanation">المعداد = أعمدة خرز، كل عمود يمثل خانة (آحاد، عشرات...). الخرز العلوي = 5، السفلي = 1.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">31</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الطرح بالاستعارة (العربية)، ماذا نفعل عندما لا يمكن الطرح مباشرة؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> نتوقف عن الحساب</div>
+                    <div class="option"><span class="option-label">ب)</span> نستعير 1 من الخانة المجاورة الأعلى</div>
+                    <div class="option"><span class="option-label">ج)</span> نضيف 10 للعدد المطروح</div>
+                    <div class="option"><span class="option-label">د)</span> نستخدم الآلة الحاسبة</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) نستعير 1 من الخانة المجاورة الأعلى</div>
+                    <div class="explanation">مثال: 502 - 278. نستعير 1 من العشرات (تصبح 0)، الخانة الأولى تصبح 12. نستعير 1 من المئات، العشرات تصبح 10 ثم 9.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">32</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في القسمة المصرية القديمة (19 ÷ 8)، كيف نختار المضاعفات؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> نختار جميع المضاعفات</div>
+                    <div class="option"><span class="option-label">ب)</span> نختار المضاعفات التي مجموعها أقل من أو يساوي المقسوم</div>
+                    <div class="option"><span class="option-label">ج)</span> نختار المضاعفات العشوائية</div>
+                    <div class="option"><span class="option-label">د)</span> نختار المضاعفات الزوجية فقط</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) نختار المضاعفات التي مجموعها أقل من أو يساوي المقسوم</div>
+                    <div class="explanation">في 19÷8: 1×8=8 ✓، 2×8=16 ✓، 4×8=32 ✗ (أكبر من 19). الناتج: 2 + 1/4 + 1/8 = 2 3/8.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">33</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    طريقة الضرب بالجدول (المعداد) تشبه:
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> لوحة الشطرنج</div>
+                    <div class="option"><span class="option-label">ب)</span> الدائرة</div>
+                    <div class="option"><span class="option-label">ج)</span> المثلث</div>
+                    <div class="option"><span class="option-label">د)</span> الخط المستقيم</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: أ) لوحة الشطرنج</div>
+                    <div class="explanation">طريقة الضرب بالجدول تشبه لوحة الشطرنج: خانات أفقية ورأسية، ونضرب كل رقم أفقي في كل رقم رأسي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">34</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الطرح الهندي "التكملة"، لحساب 15 - 7:
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> 15 + 7 - 10 = 12</div>
+                    <div class="option"><span class="option-label">ب)</span> 15 + (10 - 7) - 10 = 8</div>
+                    <div class="option"><span class="option-label">ج)</span> 15 - (10 - 7) = 12</div>
+                    <div class="option"><span class="option-label">د)</span> 15 + 7 + 10 = 32</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ب) 15 + (10 - 7) - 10 = 8</div>
+                    <div class="explanation">المبدأ: a - b = a + (10 - b) - 10. 15 - 7 = 15 + 3 - 10 = 18 - 10 = 8.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">35</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    من طور طريقة الاستعارة في الطرح؟
+                </div>
+                <div class="options">
+                    <div class="option"><span class="option-label">أ)</span> المصريون</div>
+                    <div class="option"><span class="option-label">ب)</span> الهنود</div>
+                    <div class="option"><span class="option-label">ج)</span> العرب (مثل القمصاوي)</div>
+                    <div class="option"><span class="option-label">د)</span> الرومان</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة الصحيحة: ج) العرب (مثل القمصاوي)</div>
+                    <div class="explanation">العرب طوروا طريقة الاستعارة في الطرح، ومن أشهر من استخدمها القمصاوي. الطريقة: نستعير 1 من الخانة الأعلى.</div>
+                </div>
+            </div>
+"""
+
+with open("/mnt/agents/output/quiz_part3.html", "w", encoding="utf-8") as f:
+    f.write(quiz_part3)
+
+print("Part 3 written successfully")
+          
+# Part 4 - True/False Questions 36-55
+quiz_part4 = """
+            <div class="section-title tf">اسئلة صح وخطأ (35 سؤال)</div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">36</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    الرياضيات هي علم يدرس الأعداد فقط دون الفراغ.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">الرياضيات تدرس الأعداد والفراغ والكميات والمقادير، وليس الأعداد فقط.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">37</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    الرياضيات كمادة دراسية تهدف إلى تطويع قواعد الرياضيات لتناسب مستوى الطالب.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">الرياضيات كمادة دراسية تطوع قواعد الرياضيات التربوية لتناسب مستوى الطالب وعمره.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">38</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    حساب التفاضل والتكامل يدرس التغير والكميات المتناهية الصغر.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">حساب التفاضل والتكامل يدرس معدلات التغير (التفاضل) والتكامل (المساحات تحت المنحنيات) باستخدام الكميات المتناهية الصغر.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">39</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    المسلمات في البنية الرياضية هي نتائج مبرهنة تحتاج لإثبات.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">المسلمات (البديهيات) هي افتراضات أساسية لا تحتاج لبرهان، بينما النظريات هي نتائج مبرهنة.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">40</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    من أهداف تدريس الرياضيات التخصصية: مساعدة الطالب على مواصلة الدراسة في الجامعات.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">من الأهداف التخصصية: مساعدة الطالب على مواصلة الدراسة في الجامعات وإعداده لمهن تتطلب الرياضيات.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">41</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    الرياضيات ليست ضرورية في العلوم الإنسانية مثل الاقتصاد وعلم النفس.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">الرياضيات ضرورية في العلوم الإنسانية: الاقتصاد (الإحصاء والنماذج)، علم النفس (الاختبارات والقياسات)، علم الاجتماع (الاستطلاعات).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">42</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    نظرية المجموعات والمنطق تدرس وصف العلاقات بين المجموعات وقواعد التفكير الصحيح.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">نظرية المجموعات تصف العلاقات بين المجموعات، والمنطق يدرس قواعد التفكير الصحيح والاستنتاج المنطقي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">43</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    الاحتمالات والإحصاء يدرسان فرص وقوع الأحداث وتحليل البيانات.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">الاحتمالات تدرس فرص وقوع الأحداث، والإحصاء يحلل البيانات ويستنتج النتائج من العينات.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">44</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    من أهداف تدريس الرياضيات الوجدانية: غرس حب الرياضيات والاستمتاع بها كترفيه.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">من الأهداف الوجدانية: غرس حب الرياضيات، تنمية الصبر والدقة، والاستمتاع بالرياضيات كترفيه ولغز.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">45</span>
+                    <span class="chapter-tag">الفصل 1</span>
+                    الهندسة التحليلية تدرس الأشكال في الفضاء دون استخدام المعادلات الجبرية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">الهندسة التحليلية تربط الجبر بالهندسة باستخدام المعادلات الجبرية، وليس بدونها.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">46</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    النظام الروماني يعتمد على القيمة المكانية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">النظام الروماني غير موضعي: قيمة الرمز ثابتة بغض النظر عن موقعه. VII = 5+1+1 = 7 وليس 700+10+1.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">47</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    النظام البابلي يستخدم الأساس 10 مثل النظام العشري الحالي.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">النظام البابلي يستخدم الأساس 60 (الستيني)، وليس 10. ما زلنا نستخدمه في الزوايا والوقت.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">48</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    العدد 1 يعتبر عدداً أولياً.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">العدد 1 ليس أولياً لأنه لا يقبل القسمة إلا على نفسه. العدد الأولي يقبل القسمة على 1 ونفسه فقط، و1 لا يعتبر أولياً بالتعريف الحديث.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">49</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    الأعداد التامة هي الأعداد التي مجموع قواسمها (باستثناء نفسها) يساوي العدد نفسه.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">مثال: 6 = 1+2+3، 28 = 1+2+4+7+14. هذه هي تعريف الأعداد التامة (Perfect Numbers).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">50</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    النظام الهندي-العربي الحالي يتكون من 9 رموز فقط.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">النظام الهندي-العربي يتكون من 10 رموز: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. الصفر هو الرمز العاشر والأهم.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">51</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    الخوارزمي نقل الأرقام الهندية للعالم الإسلامي في القرن التاسع الميلادي.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">الخوارزمي (حوالي 825م) كتب كتاب "الخوارزمي في الأرقام الهندية" ونقل الأرقام الهندية للعالم الإسلامي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">52</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    العدد المربع السابع = 7 × 7 = 49.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">العدد المربع = n². العدد المربع السابع = 7² = 49. أو بجمع الفردية: 1+3+5+7+9+11+13 = 49.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">53</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    النظام اليوناني (الإغريقي) كان نظاماً موضعياً يعتمد على القيمة المكانية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">النظام اليوناني كان غير موضعي: ηβ = 8+2 = 10 وليس 82. الحروف لها قيم ثابتة بغض النظر عن موقعها.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">54</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    قاعدة أقليدس لإيجاد الأعداد التامة: إذا كان 2^n - 1 عدداً أولياً، فإن 2^(n-1) × (2^n - 1) = عدد تام.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">مثال: n=2 -> 2²-1=3 (أولي) -> 2¹×3=6 (تام). n=3 -> 2³-1=7 (أولي) -> 2²×7=28 (تام).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">55</span>
+                    <span class="chapter-tag ch2">الفصل 2</span>
+                    في النظام المصري القديم، رمز الضفدعة (𓁨) يمثل 10000.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">الضفدعة (𓁨) = 100000، الإصبع (𓂭) = 10000، زهرة اللوتس (𓆼) = 1000.</div>
+                </div>
+            </div>
+"""
+
+with open("/mnt/agents/output/quiz_part4.html", "w", encoding="utf-8") as f:
+    f.write(quiz_part4)
+
+print("Part 4 written successfully")
+          
+# Part 5 - True/False Questions 56-70 + Footer + JavaScript
+quiz_part5 = """
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">56</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    المعداد الصينية هو آلة حاسبة إلكترونية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">المعداد = أعمدة خرز يدوية، ليست إلكترونية. كل عمود يمثل خانة (آحاد، عشرات...). الخرز العلوي = 5، السفلي = 1.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">57</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالأصابع (7×8)، مجموع الأصابع المرفوعة = 5، ونضربه في 10 = 50.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">في 7×8: 7 = 5+2 (2 مرفوعة)، 8 = 5+3 (3 مرفوعة). المرفوعة: 2+3 = 5 -> 5×10 = 50. المطوية: 3×2 = 6. الناتج: 50+6 = 56.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">58</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    طريقة "النقص من 10" في الطرح اخترعها المصريون القدماء.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">طريقة "النقص من 10" (التكملة) اخترعها الهنود، وليس المصريون. المبدأ: a - b = a + (10 - b) - 10.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">59</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الضرب المصرية القديمة، كانوا يضاعفون العدد الأكبر ويجمعون المضاعفات.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">المصريون كانوا يضاعفون العدد الأصغر (1, 2, 4, 8...) ثم يختارون المضاعفات التي مجموعها = العدد الأكبر.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">60</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    "خانة المحفوظات" في الجمع العربي تستخدم لحفظ الحمل (العشرات) من كل عمود.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">العرب أضافوا خانة إضافية قبل المجموع تسمى "خانة المحفوظات" لحفظ الحمل (العشرات) عند جمع كل عمود.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">61</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالشبكة (الصينية)، نجمع النواتج على الأعمدة الرأسية فقط.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">في طريقة الشبكة، نجمع النواتج على الأقطار المائلة (الأنحاء المائلة)، وليس على الأعمدة الرأسية فقط.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">62</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    طريقة السفينة الشراعية (Galois) في القسمة استخدمها الأوروبيون في العصور الوسطى.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">طريقة السفينة الشراعية (Galois) استخدمها الأوروبيون في العصور الوسطى، وتعتمد على مبدأ "النقص من 10".</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">63</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الجمع الروماني، DCCCC (500+100+100+100+100) يختصر إلى CM (900).
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">DCCCC = 500+400 = 900. CM = 1000-100 = 900. إذن DCCCC = CM = 900.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">64</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في طريقة الضرب بالتجزيء (العربية)، نجزئ كل عدد إلى أعداد أولية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">في التجزيء، نجزئ حسب المنازل (آحاد، عشرات، مئات...) وليس إلى أعداد أولية. مثال: 718 = 700+10+8.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">65</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    المعداد الصينية يستخدم خرزاً علوياً (قيمة 5) وخرزاً سفلياً (قيمة 1).
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">المعداد: الخرز العلوي = 5 (كل خرزة)، الخرز السفلي = 1 (كل خرزة). 2 خرز علوي = 10، 3 خرز سفلي = 3.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">66</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الطرح بالاستعارة (العربية)، عندما لا يمكن الطرح مباشرة نستعير 1 من الخانة المجاورة الأعلى.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">طريقة الاستعارة: نستعير 1 من الخانة الأعلى. مثال: 502-278. نستعير 1 من العشرات، الخانة الأولى تصبح 12.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">67</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في القسمة المصرية القديمة (19÷8)، نختار جميع المضاعفات بغض النظر عن قيمتها.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: خطأ</div>
+                    <div class="explanation">نختار المضاعفات التي مجموعها أقل من أو يساوي المقسوم. في 19÷8: 1×8=8 ✓، 2×8=16 ✓، 4×8=32 ✗ (أكبر من 19).</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">68</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    طريقة الضرب بالجدول (المعداد) تُشبه لوحة الشطرنج في تقسيمها لخانات أفقية ورأسية.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">طريقة الضرب بالجدول تُشبه لوحة الشطرنج: خانات أفقية ورأسية، ونضرب كل رقم أفقي في كل رقم رأسي.</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">69</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    في الطرح الهندي "التكملة"، لحساب 15-7: 15 + (10-7) - 10 = 8.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">المبدأ: a - b = a + (10 - b) - 10. 15 - 7 = 15 + 3 - 10 = 18 - 10 = 8. صحيح!</div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <div class="question-text">
+                    <span class="question-number">70</span>
+                    <span class="chapter-tag ch3">الفصل 3</span>
+                    القمصاوي من العرب الذين طوروا طريقة الاستعارة في الطرح.
+                </div>
+                <div class="tf-options">
+                    <div class="tf-option">صح</div>
+                    <div class="tf-option">خطأ</div>
+                </div>
+                <button class="toggle-btn" onclick="toggleAnswer(this)">إظهار الإجابة</button>
+                <div class="answer-section">
+                    <div class="correct-answer">الإجابة: صح</div>
+                    <div class="explanation">القمصاوي من أشهر العرب الذين استخدموا وطوروا طريقة الاستعارة في الطرح. الطريقة: نستعير 1 من الخانة الأعلى.</div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            <p>اختبار شامل لمادة تاريخ الرياضيات - 70 سؤال شاملة (35 اختيار من متعدد + 35 صح وخطأ)</p>
+            <p>الفصل الأول: الرياضيات والأعداد | الفصل الثاني: الأعداد وتطورها | الفصل الثالث: العمليات الحسابية</p>
+            <p>بالتوفيق في الامتحان!</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleAnswer(btn) {
+            var answerSection = btn.nextElementSibling;
+            if (answerSection.classList.contains('show')) {
+                answerSection.classList.remove('show');
+                btn.textContent = 'إظهار الإجابة';
+            } else {
+                answerSection.classList.add('show');
+                btn.textContent = 'إخفاء الإجابة';
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+with open("/mnt/agents/output/quiz_part5.html", "w", encoding="utf-8") as f:
+    f.write(quiz_part5)
+
+print("Part 5 written successfully")
+  
+# Now combine all parts into one file
+with open("/mnt/agents/output/quiz_part1.html", "r", encoding="utf-8") as f:
+    part1 = f.read()
+
+with open("/mnt/agents/output/quiz_part2.html", "r", encoding="utf-8") as f:
+    part2 = f.read()
+
+with open("/mnt/agents/output/quiz_part3.html", "r", encoding="utf-8") as f:
+    part3 = f.read()
+
+with open("/mnt/agents/output/quiz_part4.html", "r", encoding="utf-8") as f:
+    part4 = f.read()
+
+with open("/mnt/agents/output/quiz_part5.html", "r", encoding="utf-8") as f:
+    part5 = f.read()
+
+# Combine all parts
+full_html = part1 + part2 + part3 + part4 + part5
+
+# Write the final file
+output_path = "/mnt/agents/output/اختبار_شامل_تاريخ_الرياضيات_70_سؤال.html"
+with open(output_path, "w", encoding="utf-8") as f:
+    f.write(full_html)
+
+# Clean up temp files
+import os
+for i in range(1, 6):
+    try:
+        os.remove(f"/mnt/agents/output/quiz_part{i}.html")
+    except:
+        pass
+
+print(f"✅ تم إنشاء الملف بنجاح!")
+print(f"📁 المسار: {output_path}")
+print(f"📊 حجم الملف: {len(full_html):,} حرف")
+print(f"📊 عدد الأسئلة: 70 سؤال (35 اختيار من متعدد + 35 صح وخطأ)")
+print(f"📚 الفصول المشمولة: 3 فصول")
